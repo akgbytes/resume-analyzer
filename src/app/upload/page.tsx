@@ -1,7 +1,8 @@
 "use client";
 
+import FileUploader from "@/components/file-uploader";
 import Navbar from "@/components/navbar";
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 
 const Upload = () => {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -10,6 +11,22 @@ const Upload = () => {
 
   const handleFileSelect = (file: File | null) => {
     setFile(file);
+    console.log("file: ", file);
+  };
+
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+    const companyName = formData.get("company-name") as string;
+    const jobTitle = formData.get("job-title") as string;
+    const jobDescription = formData.get("job-description") as string;
+
+    if (!file) return;
+
+    for (const pair of formData.entries()) {
+      console.log(pair);
+    }
   };
 
   return (
@@ -28,7 +45,11 @@ const Upload = () => {
             <h2>Drop your resume for an ATS score and improvement tips</h2>
           )}
           {!isProcessing && (
-            <form id="upload-form" className="flex flex-col gap-4 mt-8">
+            <form
+              id="upload-form"
+              onSubmit={handleSubmit}
+              className="flex flex-col gap-4 mt-8"
+            >
               <div className="form-div">
                 <label htmlFor="company-name">Company Name</label>
                 <input
@@ -50,7 +71,6 @@ const Upload = () => {
               <div className="form-div">
                 <label htmlFor="job-description">Job Description</label>
                 <textarea
-                  className="resize-none"
                   rows={5}
                   name="job-description"
                   placeholder="Job Description"
@@ -60,6 +80,7 @@ const Upload = () => {
 
               <div className="form-div">
                 <label htmlFor="uploader">Upload Resume</label>
+                <FileUploader onFileSelect={handleFileSelect} />
               </div>
 
               <button className="primary-button" type="submit">
