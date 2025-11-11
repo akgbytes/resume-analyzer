@@ -32,8 +32,10 @@ const Upload = () => {
 
     setStatusText("Converting to image...");
     const imageFile = await convertPdfToImage(file);
-    if (!imageFile.file)
+    console.log("imagefile: ", imageFile.error);
+    if (!imageFile.file) {
       return setStatusText("Error: Failed to convert PDF to image");
+    }
 
     let imageUrl = "";
 
@@ -46,11 +48,37 @@ const Upload = () => {
       imageUrl = res[0].ufsUrl;
 
       console.log("Uploaded image URL:", imageUrl);
-    } catch (err) {
-      setStatusText("Error: Failed to upload image");
-    }
 
-    setStatusText("Preparing data...");
+      setStatusText("Preparing data...");
+
+      const feedbackRes = await fetch("/api/ai/feedback", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          companyName,
+          jobTitle,
+          jobDescription,
+          resumeImageUrl: imageUrl,
+        }),
+
+        credentials: "include",
+      });
+
+      if (!feedbackRes.ok) {
+        throw new Error("Failed to generate AI feedback");
+      }
+
+      const data = await feedbackRes.json();
+
+      console.log("AI Feedback:", data.feedback);
+
+      setStatusText("Analysis completed");
+    } catch (err) {
+      console.error(err);
+      setStatusText("Error: Something went wrong");
+    }
   };
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -66,6 +94,8 @@ const Upload = () => {
     for (const pair of formData.entries()) {
       console.log(pair);
     }
+
+    handleAnalyze({ companyName, jobTitle, jobDescription, file });
   };
 
   return (
