@@ -1,81 +1,94 @@
-import { useState, useCallback } from "react";
+"use client";
+
+import { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
+import { CheckCircle2, Upload } from "lucide-react";
 import { formatSize } from "../lib/utils";
 
 interface FileUploaderProps {
   onFileSelect?: (file: File | null) => void;
 }
 
+const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
+
 const FileUploader = ({ onFileSelect }: FileUploaderProps) => {
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
       const file = acceptedFiles[0] || null;
-
       onFileSelect?.(file);
     },
     [onFileSelect]
   );
 
-  const maxFileSize = 20 * 1024 * 1024; // 20MB in bytes
-
-  const { getRootProps, getInputProps, isDragActive, acceptedFiles } =
+  const { getRootProps, getInputProps, acceptedFiles, isDragActive } =
     useDropzone({
       onDrop,
       multiple: false,
       accept: { "application/pdf": [".pdf"] },
-      maxSize: maxFileSize,
+      maxSize: MAX_FILE_SIZE,
     });
 
   const file = acceptedFiles[0] || null;
 
   return (
-    <div className="w-full gradient-border">
-      <div {...getRootProps()}>
-        <input {...getInputProps()} />
+    <div {...getRootProps()}>
+      <input {...getInputProps()} />
 
-        <div className="space-y-4 cursor-pointer">
-          {file ? (
-            <div
-              className="uploader-selected-file"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <img src="/images/pdf.png" alt="pdf" className="size-10" />
-              <div className="flex items-center space-x-3">
-                <div>
-                  <p className="text-sm font-medium text-gray-700 truncate max-w-xs">
-                    {file.name}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    {formatSize(file.size)}
-                  </p>
-                </div>
-              </div>
-              <button
-                className="p-2 cursor-pointer"
-                onClick={(e) => {
-                  onFileSelect?.(null);
-                }}
-              >
-                <img src="/icons/cross.svg" alt="remove" className="w-4 h-4" />
-              </button>
-            </div>
-          ) : (
-            <div>
-              <div className="mx-auto w-16 h-16 flex items-center justify-center mb-2">
-                <img src="/icons/info.svg" alt="upload" className="size-20" />
-              </div>
-              <p className="text-lg text-gray-500">
-                <span className="font-semibold">Click to upload</span> or drag
-                and drop
-              </p>
-              <p className="text-lg text-gray-500">
-                PDF (max {formatSize(maxFileSize)})
-              </p>
-            </div>
-          )}
+      {/* Upload Box */}
+      {!file && (
+        <div
+          className={`flex flex-col items-center justify-center w-full px-6 py-12
+            border-2 border-dashed rounded-xl cursor-pointer transition-all group
+            ${
+              isDragActive
+                ? "border-primary bg-primary/5"
+                : "border-border hover:border-primary/50 hover:bg-primary/5"
+            }`}
+        >
+          <Upload className="w-10 h-10 text-muted-foreground group-hover:text-primary transition-colors mb-3" />
+
+          <p className="text-center">
+            <span className="font-semibold text-foreground">
+              Click to upload
+            </span>
+            <span className="text-muted-foreground block text-sm mt-1">
+              or drag and drop
+            </span>
+          </p>
+
+          <p className="text-xs text-muted-foreground mt-3">
+            PDF document (max {formatSize(MAX_FILE_SIZE)})
+          </p>
         </div>
-      </div>
+      )}
+
+      {/* Selected File */}
+      {file && (
+        <div
+          className="mt-4 p-4 bg-primary/10 border border-primary/20 rounded-lg
+            flex items-center gap-3"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <CheckCircle2 className="w-5 h-5 text-primary shrink-0" />
+
+          <div className="flex-1">
+            <p className="font-medium text-sm truncate">{file.name}</p>
+            <p className="text-xs text-muted-foreground">
+              {formatSize(file.size)}
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => onFileSelect?.(null)}
+            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Remove
+          </button>
+        </div>
+      )}
     </div>
   );
 };
+
 export default FileUploader;
