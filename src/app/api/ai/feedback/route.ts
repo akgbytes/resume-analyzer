@@ -58,7 +58,6 @@ export async function POST(req: Request) {
       id: record.id,
     });
   } catch (error) {
-    console.error("AI feedback error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

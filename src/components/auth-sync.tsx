@@ -10,7 +10,6 @@ export const AuthSync = () => {
 
   useEffect(() => {
     if (!isPending) {
-      console.log("initial auth checked");
       setUser(session?.user ?? null);
     }
   }, [session, isPending, setUser]);

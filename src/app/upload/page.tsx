@@ -23,7 +23,6 @@ export default function ResumePage() {
 
   const handleFileSelect = (file: File | null) => {
     setFile(file);
-    console.log("file: ", file);
   };
 
   const handleAnalyze = async ({
@@ -41,7 +40,7 @@ export default function ResumePage() {
 
     setStatusText("Converting to image...");
     const imageFile = await convertPdfToImage(file);
-    console.log("imagefile: ", imageFile.error);
+
     if (!imageFile.file) {
       return setStatusText("Failed to convert PDF to image");
     }
@@ -55,8 +54,6 @@ export default function ResumePage() {
       });
 
       imageUrl = res[0].ufsUrl;
-
-      console.log("Uploaded image URL:", imageUrl);
 
       setStatusText("Preparing data...");
 
@@ -84,7 +81,6 @@ export default function ResumePage() {
 
       router.push(`/resume/${data.id}`);
     } catch (err) {
-      console.error(err);
       setStatusText("Something went wrong");
     }
   };

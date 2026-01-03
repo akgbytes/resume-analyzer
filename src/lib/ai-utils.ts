@@ -68,7 +68,6 @@ export const generateFeedback = async ({
   try {
     return JSON.parse(content);
   } catch (err) {
-    console.error("Invalid JSON from OpenAI:", content);
     throw new Error("Failed to parse AI response");
   }
 };
